@@ -19,8 +19,8 @@ public class App {
 		String name2="CN_20170301_FACETHERUNWAY_LPD_GAB_MU_REGULAR_VD_DISP_MO";
 		int pv1=100000;
 		int pv2=1;
-		Campinfo c1 = new Campinfo(name1,pv1,"");
-		Campinfo c2 = new Campinfo(name2,pv2,"");
+		Camp_entity c1 = new Camp_entity(name1,pv1,"");
+		Camp_entity c2 = new Camp_entity(name2,pv2,"");
 		
 		int k=3;//距离阀值
  	   int i=Russia.dis(c1.getName(), c2.getName());//相邻字符的距离 

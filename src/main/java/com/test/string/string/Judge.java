@@ -8,7 +8,7 @@ package com.test.string.string;
 
 public class Judge {
 
-	public static boolean list(Campinfo camp1, Campinfo camp2, Campcenter center)
+	public static boolean list(Camp_entity camp1, Camp_entity camp2, Campcenter center)
 	{
 
 		int k=3;//距离阀值
@@ -124,7 +124,7 @@ public class Judge {
 	}
 
 	
-	public static boolean list(Campinfo camp2, Campcenter center)
+	public static boolean list(Camp_entity camp2, Campcenter center)
 	{
 
 		int k=3;//距离阀值

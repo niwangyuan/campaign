@@ -22,7 +22,7 @@ public class Filt {
 		String pathout ="/Users/wangyuanni/Desktop/campaigns/pvc.txt";
 
 		// 原始数据
-		List<Campinfo> totalList = new ArrayList<Campinfo>();
+		List<Camp_entity> totalList = new ArrayList<Camp_entity>();
 		// 归类数据
 		List<Campcenter> centerlist = new ArrayList<Campcenter>();
 
@@ -36,7 +36,7 @@ public class Filt {
 				double pv = Double.parseDouble(ary[1]);
 				raw = raw.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
 				String str = URLDecoder.decode(raw, "UTF-8");
-				Campinfo a = new Campinfo(str, pv, raw);
+				Camp_entity a = new Camp_entity(str, pv, raw);
 				totalList.add(a);
 			}
 			readTxt.close();
@@ -48,7 +48,7 @@ public class Filt {
 		//初整理
 		List<String> sortFiledNameList = new ArrayList<String>();
 		sortFiledNameList.add("name");
-		List<Campinfo> total = ListUtil.sortListByMultiFields(totalList, sortFiledNameList, 0);
+		List<Camp_entity> total = ListUtil.sortListByMultiFields(totalList, sortFiledNameList, 0);
 		Campcenter center0 = new Campcenter(total.get(0));
 		total.get(0).setCenter(center0);
 		centerlist.add(center0);
@@ -56,8 +56,8 @@ public class Filt {
 		//初归类
 		for (int i = 0; i < total.size() - 1; i++) {
 			boolean judge = false;
-			Campinfo camp1 = total.get(i);
-			Campinfo camp2 = total.get(i + 1);
+			Camp_entity camp1 = total.get(i);
+			Camp_entity camp2 = total.get(i + 1);
 			Campcenter centertemp = camp1.getCenter();
 			judge = Judge.list(camp1, camp2, centertemp);
 			if (judge)// 合并
@@ -80,20 +80,20 @@ public class Filt {
 		//进一步归类合并
 		for (int i=0;i<centerlist.size();i++) {
 			Campcenter c=centerlist.get(i);
-			List<Campinfo> list=c.getCon();
+			List<Camp_entity> list=c.getCon();
 			int size=list.size();
 			double pv=c.getPv();
 			//需要重新归类的campaign
 			if((size==1&&pv<2000)||pv<100) {
-				Campinfo camp2=new Campinfo(c);
+				Camp_entity camp2=new Camp_entity(c);
 				for(int j=0;j<centerlist.size();j++) {
 					if(j!=i) {
 						Campcenter c_big=centerlist.get(j);
-						List<Campinfo> list_big=c_big.getCon();
+						List<Camp_entity> list_big=c_big.getCon();
 						if(list_big.size()>1) {
 							boolean merge=Judge.list(camp2, c_big);
 							if(merge) {
-								for(Campinfo info:list) {
+								for(Camp_entity info:list) {
 									info.setCenter(c_big);
 									c_big.getCon().add(info);							
 								}
@@ -118,7 +118,7 @@ public class Filt {
 				c.operation();
 				if(c.getCon().size()>0) {
 					i=i+1;
-					for (Campinfo info : c.getCon()) {
+					for (Camp_entity info : c.getCon()) {
 //						writetxt.write(info.getRaw() +"("+info.getPv()+ ")^" + c.getName()+"("+c.getPv()+")");// 输出最大频率的campaign
 						writetxt.write(info.getRaw() +"^" + c.getName());
 						writetxt.newLine();

@@ -1,6 +1,6 @@
 package com.test.string.string;
 
-public class Campinfo {
+public class Camp_entity {
 	
 	private String name;//去特殊字符
 	
@@ -10,13 +10,12 @@ public class Campinfo {
 	
 	private Campcenter center;//归属簇
 
-	public Campinfo(Campcenter c) {
+	public Camp_entity(Campcenter c) {
 		this.name=c.getName();
 		this.pv=c.getPv();
-
 	}
 
-	public Campinfo(String name, double pv, String raw) {
+	public Camp_entity(String name, double pv, String raw) {
 		this.name = name;
 		this.pv = pv;
 		this.raw = raw;
