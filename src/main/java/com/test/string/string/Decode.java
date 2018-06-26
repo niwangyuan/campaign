@@ -5,11 +5,10 @@ import java.net.URLDecoder;
 
 public class Decode {
 
-	public static String get(String raw) throws UnsupportedEncodingException
-	{
+	public static String get(String raw) throws UnsupportedEncodingException {
 		String aaa;
-			aaa = URLDecoder.decode(raw, "UTF-8");
-			return aaa;
-			
+		aaa = URLDecoder.decode(raw, "UTF-8");
+		return aaa;
+
 	}
 }

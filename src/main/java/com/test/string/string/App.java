@@ -13,12 +13,12 @@ public class App {
 
 		// TODO Auto-generated method stub
 		String centername="CN_20170301_FACETHERUNWAY_LPD_GAB_MU_REGULAR_NVD_DISP_MO";
-		int pv=100000;
+		Long pv=100000L;
 		Campcenter center=new Campcenter(centername,pv);
 		String name1="CN_20170301_FACETHERUNWAY_LPD_GAB_MU_REGULAR_NVD_DISP_MO";
 		String name2="CN_20170301_FACETHERUNWAY_LPD_GAB_MU_REGULAR_VD_DISP_MO";
-		int pv1=100000;
-		int pv2=1;
+		Long pv1=100000L;
+		Long pv2=1L;
 		Camp_entity c1 = new Camp_entity(name1,pv1,"");
 		Camp_entity c2 = new Camp_entity(name2,pv2,"");
 		
@@ -41,7 +41,7 @@ public class App {
 
  	   
 		
-		boolean rs=Judge.list(c1, c2, center);
+		boolean rs=Judge.merge(c1, c2, center);
 				
 				
 		

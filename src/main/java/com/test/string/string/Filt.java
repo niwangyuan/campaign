@@ -6,9 +6,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -18,22 +21,26 @@ public class Filt {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		String pathin ="/Users/wangyuanni/Desktop/campaigns/dd_campaigns.txt";
-		String pathout ="/Users/wangyuanni/Desktop/campaigns/pvc.txt";
-
+		String pathin = "/Users/wangyuanni/Desktop/vb_dis_20180620/vb_media_dis_20180620.txt";
 		// 原始数据
 		List<Camp_entity> totalList = new ArrayList<Camp_entity>();
-		// 归类数据
-		List<Campcenter> centerlist = new ArrayList<Campcenter>();
+		Map<String, String> map = new HashMap<String, String>();
 
-		//读数据
+		// 读数据
 		try {
 			BufferedReader readTxt = new BufferedReader(new FileReader(new File(pathin)));
 			String textLine = "";// 读行
 			while ((textLine = readTxt.readLine()) != null) {
-				String[] ary = textLine.split("\\^");
-				String raw = ary[0];
-				double pv = Double.parseDouble(ary[1]);
+				String[] ary = textLine.split("	");
+				String raw;
+				Long pv;
+				if (ary.length > 1) {
+					raw = ary[1];
+					pv = Long.parseLong(ary[0]);
+				} else {
+					raw = "";
+					pv = Long.parseLong(ary[0]);
+				}
 				raw = raw.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
 				String str = URLDecoder.decode(raw, "UTF-8");
 				Camp_entity a = new Camp_entity(str, pv, raw);
@@ -44,8 +51,37 @@ public class Filt {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		map = opr_list(totalList);
+		for (String key : map.keySet()) {
+			System.out.println(key + "====" + map.get(key));
+		}
+	}
 
-		//初整理
+	public static Map<String, String> operation(Map<String, Long> map) throws UnsupportedEncodingException {
+		List<Camp_entity> totalList = loadmap(map);
+		Map<String, String> res = opr_list(totalList);
+		return res;
+	}
+
+	public static List<Camp_entity> loadmap(Map<String, Long> map) throws UnsupportedEncodingException {
+		List<Camp_entity> list = new ArrayList<Camp_entity>();
+		for (String key : map.keySet()) {
+			Long pv = map.get(key);
+			key = key.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+			String str = URLDecoder.decode(key, "UTF-8");
+			Camp_entity a = new Camp_entity(str, pv, key);
+			list.add(a);
+		}
+		return list;
+	}
+
+	public static Map<String, String> opr_list(List<Camp_entity> totalList) {
+
+		// 归类数据
+		List<Campcenter> centerlist = new ArrayList<Campcenter>();
+		// 返回值
+		Map<String, String> resmap = new HashMap<String, String>();
+		// 初整理
 		List<String> sortFiledNameList = new ArrayList<String>();
 		sortFiledNameList.add("name");
 		List<Camp_entity> total = ListUtil.sortListByMultiFields(totalList, sortFiledNameList, 0);
@@ -53,13 +89,13 @@ public class Filt {
 		total.get(0).setCenter(center0);
 		centerlist.add(center0);
 
-		//初归类
+		// 初归类
 		for (int i = 0; i < total.size() - 1; i++) {
 			boolean judge = false;
 			Camp_entity camp1 = total.get(i);
 			Camp_entity camp2 = total.get(i + 1);
 			Campcenter centertemp = camp1.getCenter();
-			judge = Judge.list(camp1, camp2, centertemp);
+			judge = Judge.merge(camp1, camp2, centertemp);
 			if (judge)// 合并
 			{
 				centertemp.getCon().add(camp2);
@@ -72,34 +108,31 @@ public class Filt {
 				centerlist.add(newcenter);
 			}
 		}
-		//簇处理
+		// 簇处理
 		for (Campcenter c : centerlist) {
 			c.operation();
 		}
-		
-		//进一步归类合并
-		for (int i=0;i<centerlist.size();i++) {
-			Campcenter c=centerlist.get(i);
-			List<Camp_entity> list=c.getCon();
-			int size=list.size();
-			double pv=c.getPv();
-			//需要重新归类的campaign
-			if((size==1&&pv<2000)||pv<100) {
-				Camp_entity camp2=new Camp_entity(c);
-				for(int j=0;j<centerlist.size();j++) {
-					if(j!=i) {
-						Campcenter c_big=centerlist.get(j);
-						List<Camp_entity> list_big=c_big.getCon();
-						if(list_big.size()>1) {
-							boolean merge=Judge.list(camp2, c_big);
-							if(merge) {
-								for(Camp_entity info:list) {
-									info.setCenter(c_big);
-									c_big.getCon().add(info);							
-								}
 
-//								camp2.setCenter(c_big);
-//								c_big.getCon().add(camp2);
+		// 进一步归类合并
+		for (int i = 0; i < centerlist.size(); i++) {
+			Campcenter c = centerlist.get(i);
+			List<Camp_entity> list = c.getCon();
+			int size = list.size();
+			Long pv = c.getPv();
+			// 需要重新归类的campaign
+			if ((size == 1 && pv < 2000) || pv < 100) {
+				Camp_entity camp2 = c.getCon().get(0);
+				for (int j = 0; j < centerlist.size(); j++) {
+					if (j != i) {
+						Campcenter c_big = centerlist.get(j);
+						List<Camp_entity> list_big = c_big.getCon();
+						if (list_big.size() >= 1) {
+							boolean merge = Judge.merge(camp2, c_big);
+							if (merge) {
+								for (Camp_entity info : list) {
+									info.setCenter(c_big);
+									c_big.getCon().add(info);
+								}
 								c.getCon().clear();
 								break;
 							}
@@ -108,30 +141,29 @@ public class Filt {
 				}
 			}
 		}
-		
-		
-		//输出结果
-		try {
-			BufferedWriter writetxt = new BufferedWriter(new FileWriter(pathout));
-			int i=0;
-			for (Campcenter c : centerlist) {
-				c.operation();
-				if(c.getCon().size()>0) {
-					i=i+1;
-					for (Camp_entity info : c.getCon()) {
-//						writetxt.write(info.getRaw() +"("+info.getPv()+ ")^" + c.getName()+"("+c.getPv()+")");// 输出最大频率的campaign
-						writetxt.write(info.getRaw() +"^" + c.getName());
-						writetxt.newLine();
-					}
+
+		// 未归类低频词条析出
+		for (int i = 0; i < centerlist.size(); i++) {
+			Campcenter c = centerlist.get(i);
+			Long pv = c.getPv();
+			// 需要析出的campaign
+			if (pv < 15) {
+				c.setName("unknow");
+			}
+		}
+
+		// 输出结果
+		int i = 0;
+		for (Campcenter c : centerlist) {
+			c.operation();
+			if (c.getCon().size() > 0) {
+				i = i + 1;
+				for (Camp_entity info : c.getCon()) {
+					resmap.put(info.getRaw(), c.getName());
 				}
 			}
-			System.out.println(i);
-			writetxt.flush();
-			writetxt.close();
-		}catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		return resmap;
 	}
 
 }

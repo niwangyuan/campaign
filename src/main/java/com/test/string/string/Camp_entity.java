@@ -6,7 +6,7 @@ public class Camp_entity {
 	
 	private String raw;//原始字符
 	
-	private double pv;//频率
+	private Long pv;//频率
 	
 	private Campcenter center;//归属簇
 
@@ -15,7 +15,7 @@ public class Camp_entity {
 		this.pv=c.getPv();
 	}
 
-	public Camp_entity(String name, double pv, String raw) {
+	public Camp_entity(String name, Long pv, String raw) {
 		this.name = name;
 		this.pv = pv;
 		this.raw = raw;
@@ -39,11 +39,11 @@ public class Camp_entity {
 		this.raw = raw;
 	}
 
-	public double getPv() {
+	public Long getPv() {
 		return pv;
 	}
 
-	public void setPv(double pv) {
+	public void setPv(Long pv) {
 		this.pv = pv;
 	}
 
